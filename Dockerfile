@@ -16,5 +16,8 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 8888
 
+# Set environment variable PORT
+ENV PORT=8080
+
 # Define the command to run the app
 CMD ["node", "app.js"]

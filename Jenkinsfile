@@ -6,6 +6,12 @@ pipeline {
   }
 
   stages {
+    stage('Clean Workspace') {
+      steps {
+        deleteDir()  // wipes the entire workspace
+      }
+    }
+
     stage('Clone') {
       steps {
         git branch: 'main', url: 'https://github.com/nasib-enosis/node-express-hello-devfile-no-dockerfile.git'
@@ -28,6 +34,20 @@ pipeline {
           }
         }
       }
+    }
+
+    stage('Cleanup Existing Container') {
+        steps {
+            script {
+                def imageNoTag = IMAGE_NAME.split(':')[0]
+                sh """
+                    CONTAINER_ID=\$(docker ps -q -f ancestor=${imageNoTag})
+                    if [ -n "\$CONTAINER_ID" ]; then
+                    docker rm -f \$CONTAINER_ID
+                    fi
+                """
+            }
+        }
     }
 
     stage('Run Container (Verify)') {
