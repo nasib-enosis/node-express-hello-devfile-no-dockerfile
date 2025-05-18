@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('Clone') {
       steps {
-        git 'https://github.com/nasib-enosis/node-express-hello-devfile-no-dockerfile.git'
+        git branch: 'main', url: 'https://github.com/nasib-enosis/node-express-hello-devfile-no-dockerfile.git'
       }
     }
 
