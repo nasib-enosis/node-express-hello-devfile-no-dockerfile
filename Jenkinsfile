@@ -36,28 +36,30 @@ pipeline {
       }
     }
 
-    stage('Cleanup Existing Container') {
+    stage('Cleanup Existing Containers') {
         steps {
-            script {
-                def imageNoTag = IMAGE_NAME.split(':')[0]
-                sh """
-                    CONTAINER_ID=\$(docker ps -q -f ancestor=${imageNoTag})
-                    if [ -n "\$CONTAINER_ID" ]; then
-                    docker rm -f \$CONTAINER_ID
-                    fi
-                """
-            }
+            sh '''
+                CONTAINERS=$(docker ps -a --format '{{.ID}} {{.Image}}' | grep "${IMAGE_NAME}" | awk '{print $1}')
+                if [ -n "$CONTAINERS" ]; then
+                    docker rm -f $CONTAINERS
+                else
+                    echo "No containers to remove for image ${IMAGE_NAME}"
+                fi
+            '''
         }
     }
 
     stage('Run Container (Verify)') {
-      steps {
-        sh """
-          docker run -d --rm -p 3000:3000 ${IMAGE_NAME}:${env.BUILD_NUMBER}
-          sleep 5
-          curl -f http://localhost:3000 || exit 1
-        """
-      }
+        steps {
+            sh """
+                docker run -d --rm -p 8888:8888 ${IMAGE_NAME}:${env.BUILD_NUMBER}
+                for i in {1..10}; do
+                    curl -f http://localhost:8888 && break
+                    echo "Waiting for app to be ready..."
+                    sleep 2
+                done
+            """
+        }
     }
   }
 
