@@ -52,7 +52,7 @@ pipeline {
     stage('Run Container (Verify)') {
         steps {
             sh """
-                docker run -d --rm -p 8888:8888 ${IMAGE_NAME}:${env.BUILD_NUMBER}
+                docker run -d --rm -p 8888:8888 --name node-hello ${IMAGE_NAME}:${env.BUILD_NUMBER}
                 for i in {1..10}; do
                     curl -f http://localhost:8888 && break
                     echo "Waiting for app to be ready..."
